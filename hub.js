@@ -11,10 +11,14 @@ const logEvent = (eventName) => (payload) => {
   )
 }
 
-eventEmitter.on(eventPool[0], logEvent(eventPool[0]))
-eventEmitter.on(eventPool[1], logEvent(eventPool[1]))
-eventEmitter.on(eventPool[2], logEvent(eventPool[2]))
+// eventEmitter.on(eventPool[0], logEvent(eventPool[0]))
+// eventEmitter.on(eventPool[1], logEvent(eventPool[1]))
+// eventEmitter.on(eventPool[2], logEvent(eventPool[2]))
 
 
-require('./driver/index')
-require('./vendor/index')
+// require('./driver/index')
+// require('./vendor/index')
+
+module.exports = {
+  logEvent
+}

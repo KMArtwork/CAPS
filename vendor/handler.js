@@ -5,13 +5,14 @@ const Chance = require('chance');
 const chance = new Chance();
 
 const packageReadyForPickup = () => {
-  console.log('Vendor package ready for pickup')
-  return {
+  let order = {
     store: chance.company(),
     orderId: chance.guid(),
     customer: chance.name(),
     address: chance.address()
   }
+  console.log('Vendor package ready for pickup')
+  return order;
 }
 
 const packageDeliveredAlert = (payload) => {
