@@ -4,13 +4,15 @@ const {eventEmitter, eventPool} = require('../eventPool');
 const Chance = require('chance');
 const chance = new Chance();
 
+const order = {
+  store: chance.company(),
+  orderId: chance.guid(),
+  customer: chance.name(),
+  address: chance.address()
+}
+
 const packageReadyForPickup = () => {
-  return {
-    store: chance.company(),
-    orderId: chance.guid(),
-    customer: chance.name(),
-    address: chance.address()
-  };
+  return order;
 }
 
 const packageDeliveredAlert = (payload) => {
