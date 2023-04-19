@@ -39,10 +39,13 @@ capsServer.on('connection', (socket) => {
   // logs 'IN-TRANSIT' event to server console when driver is en route to delivery address
   socket.on(eventPool[1], logEvent(eventPool[1]))
 
+  // logs 'DELIVERED' event to server console when driver successfully delivers package
   socket.on(eventPool[2], logEvent(eventPool[2]))
+
   socket.on(eventPool[2], (payload) => {
     console.log('Notifying vendor that package was delivered.');
-    // capsServer.emit(eventPool[2], payload)
+
+    // only sends notification to correct vendor
     socket.to(payload.store).emit(eventPool[2], payload)
   })
 
