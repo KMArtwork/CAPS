@@ -13,10 +13,19 @@ const capsServer = io.of('/caps');
 capsServer.on('connection', (socket) => {
   console.log(`CLIENT CONNECTED TO CAPS SERVER \n SOCKET: `, socket.id);
 
+  socket.on('join', (payload) => {
+    socket.join(payload.store)
+    // console.log(socket.rooms)
+    // console.log('Store joined a new room')
+  })
+
+  // socket.join('testRoom')
+
   socket.on(eventPool[0], logEvent(eventPool[0]))
   socket.on(eventPool[0], (payload) => {
     console.log('Package ready for pickup; Notifying driver.')
-    capsServer.emit(eventPool[0], payload)
+    capsServer.emit(eventPool[0], payload);
+    // socket.to('testRoom').emit(eventPool[0], payload)
   })
   socket.on(eventPool[1], logEvent(eventPool[1]))
   socket.on(eventPool[2], logEvent(eventPool[2]))
