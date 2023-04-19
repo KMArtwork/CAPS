@@ -2,12 +2,19 @@
 
 const {eventEmitter, eventPool} = require('../eventPool');
 
-// listens for driverPickup event, sends out emits 'inTransit' event
-eventEmitter.on(eventPool[1], (payload) => {
-  eventEmitter.emit(eventPool[2], 'Driver has package. Package en route to destination')
-})
+const packageDeliveredToCustomer = (payload) => {
+  console.log(`DRIVER: Successfully delivered package #${payload.orderId}`);
 
-const packageDelivered = (payload) => {
-  eventEmitter.emit(eventPool[3], 'Package successfully delivered')
+  eventEmitter.emit(eventPool[2], payload)
 }
 
+const packagePickedUpFromVendor = (payload) => {
+  console.log(`DRIVER: Package #${payload.orderId} picked up from ${payload.store}`)
+
+  eventEmitter.emit(eventPool[1], payload)
+}
+
+module.exports = {
+  packageDeliveredToCustomer,
+  packagePickedUpFromVendor
+}

@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/KMArtwork/CAPS/issues"
   },
-  "homepage": "https://github.com/KMArtwork/CAPS#readme"
+  "homepage": "https://github.com/KMArtwork/CAPS#readme",
+  "dependencies": {
+    "chance": "^1.1.11"
+  }
 }
