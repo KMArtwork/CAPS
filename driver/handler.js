@@ -9,17 +9,17 @@ const {eventEmitter, eventPool} = require('../eventPool');
 const capsSocket = io(SERVER_URL + '/caps')
 
 const packageDeliveredToCustomer = (payload) => {
-  console.log(`DRIVER: Successfully delivered package #${payload.orderId}`);
+  console.log(`DRIVER: Successfully delivered package #${payload.orderId} \n`);
 
   capsSocket.emit(eventPool[2], payload);
-  // eventEmitter.emit(eventPool[2], payload)
+
 }
 
 const packagePickedUpFromVendor = (payload) => {
-  console.log(`DRIVER: Package #${payload.orderId} picked up from ${payload.store}`)
+  console.log(`DRIVER: Package #${payload.orderId} picked up from ${payload.store} \n`)
 
   capsSocket.emit(eventPool[1], payload);
-  // eventEmitter.emit(eventPool[1], payload)
+
 }
 
 module.exports = {

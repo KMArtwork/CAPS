@@ -6,6 +6,8 @@ const chance = new Chance();
 
 const storeName = chance.company();
 
+const capsSocket = io(SERVER_URL + '/caps')
+
 const packageReadyForPickup = () => {
   return {
     store: storeName,
@@ -17,11 +19,13 @@ const packageReadyForPickup = () => {
 
 const packageDeliveredAlert = (payload) => {
   console.log(`Thank you ${payload.customer} for shopping with ${payload.store}`)
+  capsSocket.emit(eventPool[3], payload)
 }
 
-// packageReadyForPickup(chance.company());
+
 
 module.exports = {
   packageReadyForPickup,
-  packageDeliveredAlert
+  packageDeliveredAlert,
+  capsSocket
 }

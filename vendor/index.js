@@ -5,13 +5,17 @@ const { io } = require('socket.io-client');
 const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
 
 const {eventEmitter, eventPool} = require('../eventPool');
-const { packageReadyForPickup, packageDeliveredAlert } = require('./handler');
+const { packageReadyForPickup, packageDeliveredAlert, capsSocket } = require('./handler');
 
-const capsSocket = io(SERVER_URL + '/caps')
 
+
+// handles 'delivered' events
 capsSocket.on(eventPool[2], packageDeliveredAlert)
 
-// capsSocket.emit(eventPool[0], packageReadyForPickup())
+// handles 'delivered-error' events
+capsSocket.on(`${eventPool[2]}-error`, (payload) => {
+  console.log(payload)
+})
 
 const placeOrder = () => {
   let payload = packageReadyForPickup();
@@ -21,7 +25,3 @@ const placeOrder = () => {
 }
 
 setInterval(placeOrder, 12000);
-
-// eventEmitter.on(eventPool[2], packageDeliveredAlert);
-
-// eventEmitter.emit(eventPool[0], packageReadyForPickup())
