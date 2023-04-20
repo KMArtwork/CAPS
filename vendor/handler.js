@@ -1,5 +1,8 @@
 'use strict';
 
+require('dotenv').config();
+const { io } = require('socket.io-client');
+const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
 const {eventEmitter, eventPool} = require('../eventPool');
 const Chance = require('chance');
 const chance = new Chance();
@@ -8,7 +11,7 @@ const storeName = chance.company();
 
 const capsSocket = io(SERVER_URL + '/caps')
 
-const packageReadyForPickup = () => {
+const generatePackage = () => {
   return {
     store: storeName,
     orderId: chance.guid(),
@@ -18,14 +21,15 @@ const packageReadyForPickup = () => {
 }
 
 const packageDeliveredAlert = (payload) => {
-  console.log(`Thank you ${payload.customer} for shopping with ${payload.store}`)
+  console.log(payload)
+  console.log(`Thank you ${payload.order.customer} for shopping with ${payload.clientId}`)
   capsSocket.emit(eventPool[3], payload)
 }
 
 
 
 module.exports = {
-  packageReadyForPickup,
+  generatePackage,
   packageDeliveredAlert,
   capsSocket
 }
