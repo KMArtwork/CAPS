@@ -6,9 +6,6 @@ const { packageDeliveredToCustomer, pickupPackage, capsSocket } = require('./han
 // receives pickup event from the server
 capsSocket.on(eventPool[0], (payload) => {
 
-  // driver joins socket room for specific vendor
-  capsSocket.emit('join', payload);
-
   // emits transit event to the server
   pickupPackage(payload);
 })
@@ -19,4 +16,8 @@ capsSocket.on(eventPool[1], (payload) => {
 
   // emits a delivery event for each pendingDelivery received (i.e. 'delivers' each package)
   packageDeliveredToCustomer(payload)
+})
+
+capsSocket.on('join', (payload) => {
+  console.log('DRIVER JOINED ROOM')
 })

@@ -20,8 +20,17 @@ const generatePackage = () => {
   };
 }
 
+const placeOrder = () => {
+  let payload = generatePackage();
+
+  capsSocket.emit('join', payload)
+
+  console.log('Vendor package ready for pickup')
+
+  capsSocket.emit(eventPool[0], payload);
+}
+
 const packageDeliveredAlert = (payload) => {
-  console.log(payload)
   console.log(`Thank you ${payload.order.customer} for shopping with ${payload.clientId}`)
   capsSocket.emit(eventPool[3], payload)
 }
@@ -30,6 +39,7 @@ const packageDeliveredAlert = (payload) => {
 
 module.exports = {
   generatePackage,
+  placeOrder,
   packageDeliveredAlert,
   capsSocket
 }

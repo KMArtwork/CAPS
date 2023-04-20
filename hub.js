@@ -9,8 +9,7 @@ const {eventEmitter, eventPool} = require('./eventPool');
 
 const io = new Server(PORT);
 const capsServer = io.of('/caps');
-let capsInbox = new MessageQueue();
-let deliveredPackages = new MessageQueue();
+let receivedDeliveries = new MessageQueue();
 let pendingDelivery = new MessageQueue();
 
 const logEvent = (eventName) => (payload) => {
@@ -27,6 +26,7 @@ capsServer.on('connection', (socket) => {
 
   socket.on('join', (payload) => {
     socket.join(payload.store)
+    socket.to(payload.store).emit('join', payload)
   })
 
   // server receives pickup event from vendor
@@ -68,7 +68,7 @@ capsServer.on('connection', (socket) => {
 
   // receives transit event from driver
   socket.on(eventPool[1], (payload) => {
-    console.log('HUB RECEIVED TRANSIT EMIT FROM DRIVER')
+    console.log('\n HUB RECEIVED TRANSIT EMIT FROM DRIVER')
     // gets all pendingDeliveries from a specific vendor from the main inbox
     let pendingDeliveries = pendingDelivery.read(payload.store);
 
@@ -87,7 +87,7 @@ capsServer.on('connection', (socket) => {
     let pendingVendorPackages = pendingDelivery.read(payload.clientId)
     pendingVendorPackages.remove(payload.messageId)
 
-    let vendorInbox = deliveredPackages.read(payload.clientId);
+    let vendorInbox = receivedDeliveries.read(payload.clientId);
 
     if (vendorInbox) {
       vendorInbox.save(payload.messageId, {
@@ -105,7 +105,7 @@ capsServer.on('connection', (socket) => {
         clientId: payload.clientId,
         order: payload.order
       });
-      deliveredPackages.save(payload.clientId, vendorInbox)
+      receivedDeliveries.save(payload.clientId, vendorInbox)
     }
 
     socket.to(payload.clientId).emit(eventPool[2], payload)
@@ -114,13 +114,13 @@ capsServer.on('connection', (socket) => {
   socket.on(eventPool[3], (payload) => {
     try {
       // checks if there is a 'deliver successful' queue of messages for a vendor
-      let vendorInbox = deliveredPackages.read(payload.clientId);
+      let vendorInbox = receivedDeliveries.read(payload.clientId);
 
       console.log(vendorInbox)
       // removes orders if they exist (i.e. 'delivers packages')
       let deliveredOrder = vendorInbox.remove(payload.messageId);
 
-      console.log('Vendor acknowledges package delivery \n')
+      console.log(`Vendor acknowledges package delivery, \n Removed ${deliveredOrder.messageId} from delivered packages queue`)
 
       // logs event to server console, (i.e. lets HQ know that package was delivered)
       logEvent(eventPool[3])(deliveredOrder)

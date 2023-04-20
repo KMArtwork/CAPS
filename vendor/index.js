@@ -1,7 +1,12 @@
 'use strict';
 
 const {eventEmitter, eventPool} = require('../eventPool');
-const { generatePackage, packageDeliveredAlert, capsSocket } = require('./handler');
+const { 
+  generatePackage,
+  placeOrder, 
+  packageDeliveredAlert, 
+  capsSocket 
+} = require('./handler');
 
 
 
@@ -13,14 +18,9 @@ capsSocket.on(`${eventPool[2]}-error`, (payload) => {
   console.log(payload)
 })
 
-const placeOrder = () => {
-  let payload = generatePackage();
+capsSocket.on(`join`, (payload) => {
+  console.log(`VENDOR JOINED ROOM`)
+})
 
-  capsSocket.emit('join', payload)
-
-  console.log('Vendor package ready for pickup')
-
-  capsSocket.emit(eventPool[0], payload);
-}
 
 setInterval(placeOrder, 5000);

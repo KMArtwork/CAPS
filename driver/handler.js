@@ -9,6 +9,9 @@ const {eventEmitter, eventPool} = require('../eventPool');
 const capsSocket = io(SERVER_URL + '/caps')
 
 const pickupPackage = (payload) => {
+  
+  capsSocket.emit('join', payload);
+
   console.log(`DRIVER: Package #${payload.orderId} picked up from ${payload.store} \n`)
 
   capsSocket.emit(eventPool[1], payload);
