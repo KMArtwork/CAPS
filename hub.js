@@ -82,6 +82,13 @@ capsServer.on('connection', (socket) => {
 
   // receives delivered event from driver
   socket.on(eventPool[2], (payload) => {
+
+    console.log('PENDING DRIVER DELIVERIES: ', driverPickup)
+    console.log('PAYLOAD INFORMATION: ', payload)
+
+    let pendingVendorPackages = driverPickup.read(payload.clientId)
+    pendingVendorPackages.remove(payload.messageId)
+
     let vendorInbox = vendorDelivered.read(payload.clientId);
 
     if (vendorInbox) {
@@ -109,16 +116,19 @@ capsServer.on('connection', (socket) => {
   socket.on(eventPool[3], (payload) => {
     try {
       // checks if there is a 'deliver successful' queue of messages for a vendor
-      let vendorInbox = vendorDelivered.read(payload.store);
+      let vendorInbox = vendorDelivered.read(payload.clientId);
 
+      console.log(vendorInbox)
       // removes orders if they exist (i.e. 'delivers packages')
-      let deliveredOrder = vendorInbox.remove(payload.orderId);
+      let deliveredOrder = vendorInbox.remove(payload.messageId);
+
       console.log('Vendor acknowledges package delivery \n')
 
       // logs event to server console, (i.e. lets HQ know that package was delivered)
-      logEvent(eventPool[3])(deliveredORder)
+      logEvent(eventPool[3])(deliveredOrder)
 
     } catch (err) {
+      console.log('ERROR REMOVING MESSAGE FROM VENDOR RECEIVED QUEUE')
       // notifies the vendor that there was an error in delivering the package
       socket.to(payload.store).emit(`${eventPool[3]}-error`, {error: err, message: 'Vendor cannot acknowledge package delivery'})
     }
