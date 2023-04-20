@@ -10,8 +10,8 @@ const {eventEmitter, eventPool} = require('./eventPool');
 const io = new Server(PORT);
 const capsServer = io.of('/caps');
 let capsInbox = new MessageQueue();
-let vendorDelivered = new MessageQueue();
-let driverPickup = new MessageQueue();
+let deliveredPackages = new MessageQueue();
+let pendingDelivery = new MessageQueue();
 
 const logEvent = (eventName) => (payload) => {
   console.log(`
@@ -32,8 +32,8 @@ capsServer.on('connection', (socket) => {
   // server receives pickup event from vendor
   socket.on(eventPool[0], (payload) => {
 
-    // check to see if driverPickup queue already has a subqueue for a given vendor
-    let pendingVendorPackages = driverPickup.read(payload.store)
+    // check to see if pendingDelivery queue already has a subqueue for a given vendor
+    let pendingVendorPackages = pendingDelivery.read(payload.store)
 
     if (pendingVendorPackages) {
       // if there is already a subqueue for a vendor's packages, save the new package information to the pending packages queue
@@ -54,7 +54,7 @@ capsServer.on('connection', (socket) => {
         clientId: payload.store,
         order: payload
       });
-      driverPickup.save(payload.store, pendingVendorPackages);
+      pendingDelivery.save(payload.store, pendingVendorPackages);
     }
 
     // sends a 'PICKUP' alert to the drivers, letting them know that a package is ready for pickup
@@ -70,7 +70,7 @@ capsServer.on('connection', (socket) => {
   socket.on(eventPool[1], (payload) => {
     console.log('HUB RECEIVED TRANSIT EMIT FROM DRIVER')
     // gets all pendingDeliveries from a specific vendor from the main inbox
-    let pendingDeliveries = driverPickup.read(payload.store);
+    let pendingDeliveries = pendingDelivery.read(payload.store);
 
     // sends all the pendingDeliveries to the driver
     socket.emit(eventPool[1], pendingDeliveries)
@@ -83,13 +83,11 @@ capsServer.on('connection', (socket) => {
   // receives delivered event from driver
   socket.on(eventPool[2], (payload) => {
 
-    console.log('PENDING DRIVER DELIVERIES: ', driverPickup)
-    console.log('PAYLOAD INFORMATION: ', payload)
-
-    let pendingVendorPackages = driverPickup.read(payload.clientId)
+    // removes delivered package from pending driver packages
+    let pendingVendorPackages = pendingDelivery.read(payload.clientId)
     pendingVendorPackages.remove(payload.messageId)
 
-    let vendorInbox = vendorDelivered.read(payload.clientId);
+    let vendorInbox = deliveredPackages.read(payload.clientId);
 
     if (vendorInbox) {
       vendorInbox.save(payload.messageId, {
@@ -107,7 +105,7 @@ capsServer.on('connection', (socket) => {
         clientId: payload.clientId,
         order: payload.order
       });
-      vendorDelivered.save(payload.clientId, vendorInbox)
+      deliveredPackages.save(payload.clientId, vendorInbox)
     }
 
     socket.to(payload.clientId).emit(eventPool[2], payload)
@@ -116,7 +114,7 @@ capsServer.on('connection', (socket) => {
   socket.on(eventPool[3], (payload) => {
     try {
       // checks if there is a 'deliver successful' queue of messages for a vendor
-      let vendorInbox = vendorDelivered.read(payload.clientId);
+      let vendorInbox = deliveredPackages.read(payload.clientId);
 
       console.log(vendorInbox)
       // removes orders if they exist (i.e. 'delivers packages')
