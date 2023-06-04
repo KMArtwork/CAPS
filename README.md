@@ -1,4 +1,4 @@
 # CAPS
-Code Fellows - 'Code Academy Parcel Service' - 401, Week 3 Lab
+Code Fellows - 'Code Academy Parcel Service'
 
 ![UML Flow](./UML.JPG)
