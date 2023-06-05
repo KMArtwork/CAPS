@@ -1,27 +1,26 @@
 'use strict';
 
-require('dotenv').config();
-const { io } = require('socket.io-client');
-const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
-
 const {eventEmitter, eventPool} = require('../eventPool');
-const { packageReadyForPickup, packageDeliveredAlert } = require('./handler');
+const { 
+  generatePackage,
+  placeOrder, 
+  packageDeliveredAlert, 
+  capsSocket 
+} = require('./handler');
 
-const capsSocket = io(SERVER_URL + '/caps')
 
+
+// handles 'delivered' events
 capsSocket.on(eventPool[2], packageDeliveredAlert)
 
-// capsSocket.emit(eventPool[0], packageReadyForPickup())
+// handles 'delivered-error' events
+capsSocket.on(`${eventPool[2]}-error`, (payload) => {
+  console.log(payload)
+})
 
-const placeOrder = () => {
-  let payload = packageReadyForPickup();
-  capsSocket.emit('join', payload)
-  console.log('Vendor package ready for pickup')
-  capsSocket.emit(eventPool[0], payload);
-}
+capsSocket.on(`join`, (payload) => {
+  console.log(`VENDOR JOINED ROOM`)
+})
 
-setInterval(placeOrder, 12000);
 
-// eventEmitter.on(eventPool[2], packageDeliveredAlert);
-
-// eventEmitter.emit(eventPool[0], packageReadyForPickup())
+setInterval(placeOrder, 5000);

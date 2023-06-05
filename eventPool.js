@@ -7,6 +7,8 @@ const eventPool = [
   'pickup',
   'transit',
   'delivered',
+  'received',
+  'getAll'
 ]
 
 module.exports = {

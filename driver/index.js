@@ -1,17 +1,23 @@
 'use strict';
 
 const { eventEmitter, eventPool } = require('../eventPool');
-const { packageDeliveredToCustomer, packagePickedUpFromVendor, capsSocket } = require('./handler');
+const { packageDeliveredToCustomer, pickupPackage, capsSocket } = require('./handler');
 
+// receives pickup event from the server
 capsSocket.on(eventPool[0], (payload) => {
-  console.log('Driver has been notified, en route to pick up package from Vendor.')
-  capsSocket.emit('join', payload);
-  packagePickedUpFromVendor(payload);
-  packageDeliveredToCustomer(payload);
+
+  // emits transit event to the server
+  pickupPackage(payload);
 })
 
-// eventEmitter.on(eventPool[0], (payload) => {
-//   packagePickedUpFromVendor(payload);
-//   packageDeliveredToCustomer(payload);
-// });
+// receives transit event from the server, receives all pending delivery messages
+capsSocket.on(eventPool[1], (payload) => {
+  console.log('DRIVER RECEIVED TRANSIT EMIT FROM HUB')
 
+  // emits a delivery event for each pendingDelivery received (i.e. 'delivers' each package)
+  packageDeliveredToCustomer(payload)
+})
+
+capsSocket.on('join', (payload) => {
+  console.log('DRIVER JOINED ROOM')
+})
